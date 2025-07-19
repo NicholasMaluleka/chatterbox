@@ -11,21 +11,18 @@ module.exports = {
     }
   },
 
-  addUser: (req, res) => {
+  addUser: async (req, res) => {
     let payload = { ...req.body };
-    bcrypt.genSalt(saltRounds, (err, salt) => {
-      bcrypt.hash(payload.password, salt, async (err, hash) => {
+    
         try {
-          payload['password'] = hash;
           const newUser = new User(payload);
           const result = await newUser.save();
           res.status(201).send(newUser);
         } catch (error) {
           res.status(500).send(error);
         }
-      });
-    });
-  },
+    }
+  ,
 
   getAll: async (req, res) => {
     try {
@@ -53,13 +50,6 @@ module.exports = {
     try {
       const { _id } = req.params;
       const updateData = { ...req.body };
-
-      // If password is being updated, hash it again
-      if (updateData.password) {
-        const salt = await bcrypt.genSalt(saltRounds);
-        const hashedPassword = await bcrypt.hash(updateData.password, salt);
-        updateData.password = hashedPassword;
-      }
 
       const updatedUser = await User.findOneAndUpdate(
         { _id },
